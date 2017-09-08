@@ -20,11 +20,7 @@ module Primalize
     end
 
     def self.enumerable serializer_class
-      Class.new do
-        def initialize enumerable
-          @enumerable = enumerable
-        end
-
+      Class.new(Enumerable) do
         define_method :call do
           @enumerable.map { |item| serializer_class.new(item).call }
         end
@@ -35,12 +31,50 @@ module Primalize
       end
     end
 
+    class Enumerable
+      def initialize enumerable
+        validate! enumerable
+
+        @enumerable = enumerable
+      end
+
+      def validate! enumerable
+        unless %w(each map).all? { |msg| enumerable.respond_to? msg }
+          raise ArgumentError, "#{self.class.inspect} must receive an Enumerable object, received #{enumerable.inspect}"
+        end
+      end
+
+      def call
+        raise RuntimeError,
+          "Called #{inspect}#call. Please use Primalize::Many.enumerable to create primalizers for this."
+      end
+    end
+
     def self.inspect
-      "#{name}(#{attributes.map { |attr, serializer| "#{attr}: #{serializer.inspect}" }.join(', ')})"
+      attrs = attributes
+        .map { |attr, serializer| "#{attr}: #{serializer.inspect}" }
+        .join(', ')
+
+      "#{name}(#{attrs})"
     end
 
     def initialize attributes
+      validate_attributes! attributes
+
       @attributes = attributes
+    end
+
+    def validate_attributes! attributes
+      unless self.class.attributes.each_key.all? { |key| attributes[key] }
+        non_nil_keys = attributes
+          .select { |_attr, value| value }
+          .map { |attr, _value| attr }
+
+        missing_keys = self.class.attributes.keys - non_nil_keys
+
+        raise ArgumentError,
+          "#{self.class} is missing the following keys: #{missing_keys.map(&:inspect).join(', ')}"
+      end
     end
 
     def call

@@ -73,5 +73,24 @@ module Primalize
     it 'outputs to a pretty format' do
       expect(serializer_class.inspect).to eq 'ZOMGSerializer(user: UserSerializer, tweets: enumerable(TweetSerializer))'
     end
+
+    it 'raises an error if an argument is missing' do
+      expect { serializer_class.new(user: double) }
+        .to raise_error ArgumentError, /missing.*tweets/
+    end
+
+    it 'raises an error if an argument is nil' do
+      expect { serializer_class.new(user: nil, tweets: [double]) }
+        .to raise_error ArgumentError, /missing.*user/
+    end
+
+    it 'raises an error if an enumerable argument is not an enumerable' do
+      expect {
+        serializer_class.new(
+          user: double(id: 1, name: 'lol'),
+          tweets: Object.new,
+        ).call
+      }.to raise_error ArgumentError, /must receive an Enumerable object/
+    end
   end
 end
