@@ -112,6 +112,19 @@ class ShipmentSerializer < Primalize::Single
 end
 ```
 
+### Type Checking
+
+By default, subclasses of `Primalize::Single` will raise an `ArgumentError` if there is a mismatch between the types declared in its `attributes` call and what is passed in to be primalized. In production, you might not want that to happen, so you can change that in your production config:
+
+```ruby
+Primalize::Single.type_mismatch_handler = proc do |attr, type, value|
+  msg = "Type mismatch: #{attr} is expected to be #{type.inspect}, but is a #{value.inspect} - " +
+    caller.grep(Regexp.new(Rails.root))
+
+  Slack.notify '#bugs', msg
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
