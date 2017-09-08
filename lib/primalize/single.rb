@@ -2,10 +2,11 @@ require 'json'
 
 module Primalize
   class Single
+    @type_mismatch_handler = proc do |attr, type, value|
+      raise TypeError, "#{self}##{attr} is specified as #{type.inspect}, but is #{value.inspect}"
+    end
+
     class << self
-      DEFAULT_TYPE_MISMATCH_HANDLER = proc do |attr, type, value|
-        raise TypeError, "#{self}##{attr} is specified as #{type.inspect}, but is #{value.inspect}"
-      end
 
       def attributes attrs={}
         @attributes ||= {}
@@ -71,8 +72,6 @@ module Primalize
       def type_mismatch_handler
         if @type_mismatch_handler
           @type_mismatch_handler
-        elsif self == Single
-          DEFAULT_TYPE_MISMATCH_HANDLER
         else
           superclass.type_mismatch_handler
         end
@@ -90,7 +89,7 @@ module Primalize
     end
 
     def call
-      self.class.attributes.each_with_object({}) do |(attr, type), hash|
+      self.class.attributes.each_with_object({}) do |(attr, _), hash|
         hash[attr] = public_send(attr)
       end
     end
@@ -101,7 +100,7 @@ module Primalize
 
     module Type
       def coerce *args
-        (@coercion || DEFAULT_COERCION).call *args
+        (@coercion || DEFAULT_COERCION).call(*args)
       end
     end
 

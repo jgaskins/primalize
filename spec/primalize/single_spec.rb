@@ -45,7 +45,7 @@ module Primalize
       expect(serializer.call.fetch(:address)).to be_nil
     end
 
-    replacement_attrs = [
+    [
       { id: 'abc' },
       { id: nil },
       { name: 123 },
