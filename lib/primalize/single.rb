@@ -1,4 +1,5 @@
 require 'json'
+require 'date'
 
 module Primalize
   class Single
@@ -63,6 +64,10 @@ module Primalize
 
       def enum *values, &coerce
         Enum.new(values, &coerce)
+      end
+
+      def timestamp &coerce
+        Timestamp.new(&coerce)
       end
 
       def type_mismatch_handler= handler
@@ -211,6 +216,20 @@ module Primalize
 
       def inspect
         "object(#{@types.map { |attr, type| "#{attr}: #{type.inspect}" }.join(', ')})"
+      end
+    end
+
+    class Timestamp
+      include Type
+
+      TYPES = [Time, Date, DateTime].freeze
+
+      def === value
+        TYPES.any? { |type| type === value }
+      end
+
+      def inspect
+        'timestamp'
       end
     end
 

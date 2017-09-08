@@ -15,6 +15,7 @@ module Primalize
         rating: float,
         address: optional(string),
         state: enum(1, 2, 3, 4),
+        created_at: timestamp,
       )
     end
     let(:default_attrs) do
@@ -30,6 +31,7 @@ module Primalize
         rating: 3.5,
         address: '123 Main St',
         state: 1,
+        created_at: Time.new(1999, 12, 31, 23, 59, 59),
       }
     end
 
@@ -61,6 +63,7 @@ module Primalize
       { rating: nil },
       { rating: 'abc' },
       { address: 123 },
+      { created_at: nil },
     ].each do |attrs|
       attr, value = attrs.first
       type = serializer_class.attributes[attr].inspect
