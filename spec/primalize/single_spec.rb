@@ -199,17 +199,18 @@ module Primalize
       )
     end
 
-    it 'outputs a pretty inspect' do
-      def serializer_class.name
-        'StuffSerializer'
-      end
+    describe 'pretty inspect' do
+      it 'outputs a pretty inspect' do
+        def serializer_class.name
+          'StuffSerializer'
+        end
 
-      def order_serializer_class.inspect
-        'OrderSerializer'
-      end
+        def order_serializer_class.inspect
+          'OrderSerializer'
+        end
 
-      # Wacky transformations to make the expected output easier to read
-      expected = <<~EOF.strip.gsub(/\s+/, ' ').gsub(/(\() | (\))/) { |match| match.strip }
+        # Wacky transformations to make the expected output easier to read
+        expected = <<~EOF.strip.gsub(/\s+/, ' ').gsub(/(\() | (\))/) { |match| match.strip }
         StuffSerializer(
           id: integer,
           name: string,
@@ -224,11 +225,36 @@ module Primalize
           state: enum(1, 2, 3, 4),
           order: primalize(OrderSerializer),
           value: number,
+          loosely_defined: any(string, integer),
           created_at: timestamp
         )
-      EOF
+        EOF
 
-      expect(serializer_class.inspect).to eq expected
+        expect(serializer_class.inspect).to eq expected
+      end
+
+      {
+        serializer_class.integer => 'integer',
+        serializer_class.string => 'string',
+        serializer_class.array(serializer_class.string) => 'array(string)',
+        serializer_class.array(serializer_class.integer) => 'array(integer)',
+        serializer_class.boolean => 'enum(true, false)',
+        serializer_class.enum(1, 2, 3) => 'enum(1, 2, 3)',
+        serializer_class.any(
+          serializer_class.string,
+          serializer_class.integer,
+        ) => 'any(string, integer)',
+        serializer_class.number => 'number',
+        serializer_class.float => 'float',
+        serializer_class.optional(serializer_class.number) => 'optional(number)',
+        serializer_class.primalize(order_serializer_class) => 'primalize(OrderSerializer)',
+        serializer_class.object(key: serializer_class.string) => 'object(key: string)',
+        serializer_class.timestamp => 'timestamp',
+      }.each do |type, expected_output|
+        it "pretty-prints #{type} as #{expected_output}" do
+          expect(type.inspect).to eq expected_output
+        end
+      end
     end
   end
 end
