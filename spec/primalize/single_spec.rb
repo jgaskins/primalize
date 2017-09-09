@@ -24,6 +24,7 @@ module Primalize
         state: enum(1, 2, 3, 4),
         order: primalize(order_serializer_class),
         value: number,
+        loosely_defined: any(string, integer),
         created_at: timestamp,
       )
     end
@@ -46,6 +47,7 @@ module Primalize
           payment_method: 'card_123456',
         ),
         value: 21.3,
+        loosely_defined: 'wat',
         created_at: Time.new(1999, 12, 31, 23, 59, 59),
       }
     end
@@ -87,6 +89,7 @@ module Primalize
       { address: 123 },
       { created_at: nil },
       { order: nil },
+      { loosely_defined: nil },
     ].each do |attrs|
       attr, value = attrs.first
       type = serializer_class.attributes[attr].inspect

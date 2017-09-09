@@ -69,6 +69,10 @@ module Primalize
         Timestamp.new(&coerce)
       end
 
+      def any *types, &coerce
+        Any.new(types, &coerce)
+      end
+
       def primalize primalizer, &coerce
         Primalizer.new(primalizer, &coerce)
       end
@@ -293,6 +297,23 @@ module Primalize
 
       def inspect
         "optional(#{@types.map(&:inspect).join(', ')})"
+      end
+    end
+
+    class Any
+      include Type
+
+      def initialize types, &coercion
+        @types = types
+      end
+
+      def === value
+        @types.empty? || @types.any? { |type| type === value }
+      end
+
+      def inspect
+        params = "(#{@types.map(&:inspect).join(', ')})"
+        "any#{@types.empty? ? nil : params}"
       end
     end
   end
