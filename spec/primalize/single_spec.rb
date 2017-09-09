@@ -23,6 +23,7 @@ module Primalize
         address: optional(string),
         state: enum(1, 2, 3, 4),
         order: primalize(order_serializer_class),
+        value: number,
         created_at: timestamp,
       )
     end
@@ -44,6 +45,7 @@ module Primalize
           price_cents: 123_45,
           payment_method: 'card_123456',
         ),
+        value: 21.3,
         created_at: Time.new(1999, 12, 31, 23, 59, 59),
       }
     end
@@ -218,6 +220,7 @@ module Primalize
           address: optional(string),
           state: enum(1, 2, 3, 4),
           order: primalize(OrderSerializer),
+          value: number,
         )
       EOF
 

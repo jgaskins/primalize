@@ -53,6 +53,10 @@ module Primalize
         Float.new(&coerce)
       end
 
+      def number &coerce
+        Number.new(&coerce)
+      end
+
       def optional *types, &coerce
         Optional.new(types, &coerce)
       end
@@ -143,6 +147,18 @@ module Primalize
 
       def inspect
         'float'
+      end
+    end
+
+    class Number
+      include Type
+
+      def === value
+        ::Numeric === value
+      end
+
+      def inspect
+        'number'
       end
     end
 
