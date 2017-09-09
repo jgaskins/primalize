@@ -24,12 +24,7 @@ module Primalize
 
         attrs.each do |attr, type|
           define_method attr do
-            value = type.coerce(object.public_send(attr))
-            if type === value
-              value
-            else
-              self.class.type_mismatch_handler.call attr, type, value
-            end
+            type.coerce(object.public_send(attr))
           end
         end
       end
@@ -94,8 +89,14 @@ module Primalize
     end
 
     def call
-      self.class.attributes.each_with_object({}) do |(attr, _), hash|
-        hash[attr] = public_send(attr)
+      self.class.attributes.each_with_object({}) do |(attr, type), hash|
+        value = public_send(attr)
+
+        if type === value
+          hash[attr] = value
+        else
+          self.class.type_mismatch_handler.call self.class, attr, type, value
+        end
       end
     end
 

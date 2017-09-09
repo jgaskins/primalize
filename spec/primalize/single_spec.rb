@@ -75,6 +75,20 @@ module Primalize
       end
     end
 
+    it 'checks the return type of a method defined by the primalizer' do
+      my_serializer = Class.new(Single) do
+        attributes(foo: string)
+
+        def foo
+          object.bar
+        end
+      end
+
+      expect { my_serializer.new(double(bar: 'baz')).call }.not_to raise_error
+      expect { my_serializer.new(double(bar: nil)).call }
+        .to raise_error TypeError
+    end
+
     it 'allows a handler to be set on a type mismatch' do
       serializer_class.type_mismatch_handler = proc do |klass, attr, type, value|
         expect(klass).to be serializer_class
