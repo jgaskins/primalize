@@ -141,9 +141,9 @@ end
 By default, subclasses of `Primalize::Single` will raise an `ArgumentError` if there is a mismatch between the types declared in its `attributes` call and what is passed in to be primalized. In production, you might not want that to happen, so you can change that in your production config:
 
 ```ruby
-Primalize::Single.type_mismatch_handler = proc do |attr, type, value|
-  msg = "Type mismatch: #{attr} is expected to be #{type.inspect}, but is a #{value.inspect} - " +
-    caller.grep(Regexp.new(Rails.root))
+Primalize::Single.type_mismatch_handler = proc do |primalizer, attr, type, value|
+  msg = "Type mismatch: #{primalizer.name}##{attr} is expected to be #{type.inspect}, but is a #{value.inspect}\n"
+  msg << caller.grep(Regexp.new(Rails.root)).join("\n") # Include application stack trace
 
   Slack.notify '#bugs', msg
 end
