@@ -47,12 +47,15 @@ module Primalize
       end
     end
 
-    it 'serializes all the things' do
-      user = double('User', id: 123, name: 'Jamie')
-      tweets = [
+    let(:user) { double('User', id: 123, name: 'Jamie') }
+    let(:tweets) do
+      [
         double('Tweet', id: 1, body: 'hello world!'),
         double('Tweet', id: 2, body: 'serializing for great justice!'),
       ]
+    end
+
+    it 'serializes all the things' do
       serializer = serializer_class.new(
         user: user,
         tweets: tweets,
@@ -91,6 +94,27 @@ module Primalize
           tweets: Object.new,
         ).call
       }.to raise_error ArgumentError, /must receive an Enumerable object/
+    end
+
+    describe 'conversion' do
+      let(:serializer) { serializer_class.new(user: user, tweets: tweets) }
+
+      it 'generates JSON' do
+        expect(serializer.to_json).to eq('{"user":{"id":123,"name":"Jamie"},"tweets":[{"id":1,"body":"hello world!"},{"id":2,"body":"serializing for great justice!"}]}')
+      end
+
+      it 'generates CSV' do
+        expect(serializer.to_csv(:user)).to eq <<~CSV
+          id,name
+          123,Jamie
+        CSV
+
+        expect(serializer.to_csv(:tweets)).to eq <<~CSV
+          id,body
+          1,hello world!
+          2,serializing for great justice!
+        CSV
+      end
     end
   end
 end

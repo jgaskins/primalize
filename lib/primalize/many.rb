@@ -28,6 +28,10 @@ module Primalize
         define_singleton_method :inspect do
           "enumerable(#{serializer_class.inspect})"
         end
+
+        define_singleton_method :attributes do
+          serializer_class.attributes
+        end
       end
     end
 
@@ -85,6 +89,23 @@ module Primalize
 
     def to_json
       call.to_json
+    end
+
+    def to_csv attr
+      CSV.generate do |csv|
+        result = call[attr]
+
+        csv << self.class.attributes[attr].attributes.keys
+
+        case result
+        when Hash
+          csv << result.values
+        when Array
+          result.each do |hash|
+            csv << hash.values
+          end
+        end
+      end
     end
   end
 end

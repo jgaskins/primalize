@@ -1,5 +1,6 @@
 require 'json'
 require 'date'
+require 'csv'
 
 module Primalize
   class Single
@@ -111,6 +112,21 @@ module Primalize
           self.class.type_mismatch_handler.call self.class, attr, type, value
         end
       end
+    end
+
+    # CONVERSION
+
+    def to_json
+      call.to_json
+    end
+
+    def csv_headers
+      self.class.attributes.keys.map(&:to_s)
+    end
+
+    def to_csv
+      hash = call
+      CSV.generate { |csv| csv << hash.values }
     end
 
     # TYPES

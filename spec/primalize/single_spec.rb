@@ -256,5 +256,26 @@ module Primalize
         end
       end
     end
+
+    describe 'conversion' do
+      let(:obj) { double(hello: 'world') }
+      let(:my_serializer) do
+        Class.new(Single) do
+          attributes(hello: string)
+        end
+      end
+      let(:serializer) { my_serializer.new(obj) }
+
+      it 'converts to JSON' do
+        expect(serializer.to_json).to eq '{"hello":"world"}'
+      end
+
+      it 'converts to CSV' do
+        expect(serializer.csv_headers).to eq ['hello']
+        expect(serializer.to_csv).to eq <<~CSV
+          world
+        CSV
+      end
+    end
   end
 end
