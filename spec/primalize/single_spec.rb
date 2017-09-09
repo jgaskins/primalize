@@ -126,7 +126,7 @@ module Primalize
     end
 
     it 'allows overriding the method from the object to coerce values' do
-      serializer_class = Class.new(Single) do
+      my_serializer = Class.new(Single) do
         attributes(
           name: string,
         )
@@ -137,13 +137,13 @@ module Primalize
       end
       object = double(name: 'jamie')
 
-      serializer = serializer_class.new(object)
+      serializer = my_serializer.new(object)
 
       expect(serializer.call).to eq(name: 'Jamie')
     end
 
     it 'allows blocks to coerce values' do
-      serializer_class = Class.new(Single) do
+      my_serializer = Class.new(Single) do
         attributes(
           id: integer { |value| value.abs },
           name: string { |value| value.to_s.capitalize },
@@ -181,7 +181,7 @@ module Primalize
         state: 12,
       )
 
-      expect(serializer_class.new(object).call).to eq(
+      expect(my_serializer.new(object).call).to eq(
         id: 123,
         name: 'Jamie',
         nicknames: ['foo', 'bar', 'baz'],
