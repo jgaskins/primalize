@@ -221,6 +221,7 @@ module Primalize
           state: enum(1, 2, 3, 4),
           order: primalize(OrderSerializer),
           value: number,
+          created_at: timestamp
         )
       EOF
 
