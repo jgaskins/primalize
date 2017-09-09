@@ -79,7 +79,11 @@ Or install it yourself as:
 
 ## Usage
 
-If you need to primalize a single object, you subclass `Primalize::Single` and specify the attributes and types of the result as in the example above. The complete list of supported types are:
+If you need to primalize a single object, you subclass `Primalize::Single` and specify the attributes and types of the result as in the example above.
+
+### Supported types
+
+The complete list of supported types are:
 
 - `integer`: whole numbers
 - `float`: floating-point numbers
@@ -103,7 +107,9 @@ If you need to primalize a single object, you subclass `Primalize::Single` and s
   - Only the required keys need to be specified. The rest of the hash will pass.
   - If no keys are specified, all of them are optional and it will match any hash.
 
-But reducing the object's attributes to a hash isn't all you do in most apps. You may also need to do some coercion. For example, if you have an object whose `city` isn't stored as a string but you need to translate it to one:
+### Attribute coercion
+
+Reducing the object's attributes to a hash isn't all you do in most apps. You may also need to do some coercion. For example, if you have an object whose `city` isn't stored as a string but you need to translate it to one:
 
 ```ruby
 class ShipmentSerializer < Primalize::Single
@@ -113,6 +119,8 @@ class ShipmentSerializer < Primalize::Single
   )
 end
 ```
+
+### Virtual attributes
 
 You can also generate attributes that don't exist on the object being primalized by defining methods on the primalizer:
 
