@@ -93,6 +93,7 @@ module Primalize
     attr_reader :object
 
     def initialize object
+      raise ArgumentError, "#{self.class.inspect} cannot serialize `nil'" if object.nil?
       @object = object
     end
 
