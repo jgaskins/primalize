@@ -2,6 +2,13 @@ require 'primalize/single'
 
 module Primalize
   RSpec.describe Single do
+    order_serializer_class = Class.new(Single) do
+      attributes(
+        price_cents: integer,
+        payment_method: string,
+      )
+    end
+
     serializer_class = Class.new(Single) do
       attributes(
         id: integer,
@@ -15,9 +22,11 @@ module Primalize
         rating: float,
         address: optional(string),
         state: enum(1, 2, 3, 4),
+        order: primalize(order_serializer_class),
         created_at: timestamp,
       )
     end
+
     let(:default_attrs) do
       {
         id: 123,
@@ -31,6 +40,10 @@ module Primalize
         rating: 3.5,
         address: '123 Main St',
         state: 1,
+        order: double(
+          price_cents: 123_45,
+          payment_method: 'card_123456',
+        ),
         created_at: Time.new(1999, 12, 31, 23, 59, 59),
       }
     end
@@ -38,7 +51,14 @@ module Primalize
     it 'serializes to a hash' do
       serializer = serializer_class.new(double(default_attrs))
 
-      expect(serializer.call).to eq(default_attrs)
+      actually_serialized_things = {
+        order: { # converted to a hash from a proper object
+          price_cents: 12345,
+          payment_method: 'card_123456',
+        },
+      }
+
+      expect(serializer.call).to eq(default_attrs.merge(actually_serialized_things))
     end
 
     it 'allows nils for optional types' do
@@ -64,6 +84,7 @@ module Primalize
       { rating: 'abc' },
       { address: 123 },
       { created_at: nil },
+      { order: nil },
     ].each do |attrs|
       attr, value = attrs.first
       type = serializer_class.attributes[attr].inspect
@@ -178,6 +199,10 @@ module Primalize
         'StuffSerializer'
       end
 
+      def order_serializer_class.inspect
+        'OrderSerializer'
+      end
+
       # Wacky transformations to make the expected output easier to read
       expected = <<~EOF.strip.gsub(/\s+/, ' ').gsub(/(\() | (\))/) { |match| match.strip }
         StuffSerializer(
@@ -191,7 +216,8 @@ module Primalize
           ),
           rating: float,
           address: optional(string),
-          state: enum(1, 2, 3, 4)
+          state: enum(1, 2, 3, 4),
+          order: primalize(OrderSerializer),
         )
       EOF
 

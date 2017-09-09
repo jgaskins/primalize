@@ -65,6 +65,10 @@ module Primalize
         Timestamp.new(&coerce)
       end
 
+      def primalize primalizer, &coerce
+        Primalizer.new(primalizer, &coerce)
+      end
+
       def type_mismatch_handler= handler
         @type_mismatch_handler = handler
       end
@@ -102,9 +106,9 @@ module Primalize
 
     # TYPES
 
-    DEFAULT_COERCION = proc { |arg| arg } # Don't coerce by default
-
     module Type
+      DEFAULT_COERCION = proc { |arg| arg } # Don't coerce by default
+
       def coerce *args
         (@coercion || DEFAULT_COERCION).call(*args)
       end
@@ -204,7 +208,7 @@ module Primalize
 
       def initialize types, &coercion
         @types = types
-        @coercion = coercion || DEFAULT_COERCION
+        @coercion = coercion
       end
 
       def === value
@@ -231,6 +235,30 @@ module Primalize
 
       def inspect
         'timestamp'
+      end
+    end
+
+    class Primalizer
+      include Type
+
+      def initialize primalizer, &coercion
+        @primalizer = primalizer
+        @coercion = coercion || proc do |obj|
+          # FIXME: this is dumb
+          begin
+            primalizer.new(obj).call
+          rescue ArgumentError => e
+            raise TypeError.new(e)
+          end
+        end
+      end
+
+      def === value
+        true
+      end
+
+      def inspect
+        "primalize(#{@primalizer.inspect})"
       end
     end
 
