@@ -79,7 +79,31 @@ Or install it yourself as:
 
 ## Usage
 
-If you need to primalize a single object, you subclass `Primalize::Single` and specify the attributes and types of the result as in the example above. But reducing the object's attributes to a hash isn't all you do in most apps. You may also need to do some coercion. For example, if you have an object whose `city` isn't stored as a string but you need to translate it to one:
+If you need to primalize a single object, you subclass `Primalize::Single` and specify the attributes and types of the result as in the example above. The complete list of supported types are:
+
+- `integer`: whole numbers
+- `float`: floating-point numbers
+- `number`: any numeric value
+- `string`: text
+- `boolean`: explicitly `true` or `false` (not "truthy" or "falsy" values)
+- `array(*types)`: an array containing values of the specified types
+  - Example: `array(string, integer)`
+- `optional(*types)`: any of the specified types or `nil`
+  - Example: `optional(string)`, both `"foo"` and `nil` are acceptable values
+- `enum(*values)`: must be one of the specified values
+  - Example: `enum('requested', 'shipped', 'delivered')`
+- `timestamp`: a `Date`, `Time`, or `DateTime` value
+- `any(*types)`: any value of the given types
+  - Example: `any(string, integer)` will only match on strings and integers
+  - If no types are specified, any value will match
+- `primalize(YourPrimalizerClass)`: primalizes the specified attribute with the given `Primalize::Single` subclass
+  - Example: `primalize(OrderSerializer)`
+- `object(**types)`: a hash of the specified structure
+  - Example: `object(id: integer, name: string)`
+  - Only the required keys need to be specified. The rest of the hash will pass.
+  - If no keys are specified, all of them are optional and it will match any hash.
+
+But reducing the object's attributes to a hash isn't all you do in most apps. You may also need to do some coercion. For example, if you have an object whose `city` isn't stored as a string but you need to translate it to one:
 
 ```ruby
 class ShipmentSerializer < Primalize::Single
