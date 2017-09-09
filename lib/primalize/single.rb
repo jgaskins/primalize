@@ -3,8 +3,8 @@ require 'date'
 
 module Primalize
   class Single
-    @type_mismatch_handler = proc do |attr, type, value|
-      raise TypeError, "#{self}##{attr} is specified as #{type.inspect}, but is #{value.inspect}"
+    @type_mismatch_handler = proc do |klass, attr, type, value|
+      raise TypeError, "#{klass}##{attr} is specified as #{type.inspect}, but is #{value.inspect}"
     end
 
     class << self

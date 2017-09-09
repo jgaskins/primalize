@@ -76,7 +76,8 @@ module Primalize
     end
 
     it 'allows a handler to be set on a type mismatch' do
-      serializer_class.type_mismatch_handler = proc do |attr, type, value|
+      serializer_class.type_mismatch_handler = proc do |klass, attr, type, value|
+        expect(klass).to be serializer_class
         expect(attr).to eq :name
         expect(value).to eq 12
         expect(type).to be_a Single::String
