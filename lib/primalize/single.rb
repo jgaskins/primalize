@@ -174,6 +174,10 @@ module Primalize
     class Number
       include Type
 
+      def initialize &coercion
+        @coercion = coercion
+      end
+
       def === value
         ::Numeric === value
       end
@@ -266,6 +270,10 @@ module Primalize
 
       TYPES = [Time, Date, DateTime].freeze
 
+      def initialize &coercion
+        @coercion = coercion
+      end
+
       def === value
         TYPES.any? { |type| type === value }
       end
@@ -321,6 +329,7 @@ module Primalize
 
       def initialize types, &coercion
         @types = types
+        @coercion = coercion
       end
 
       def === value
