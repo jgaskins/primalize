@@ -102,6 +102,11 @@ module Primalize
       end
     end
 
+    it 'raises an error if it receives nil' do
+      expect { serializer_class.new(nil).call }
+        .to raise_error ArgumentError
+    end
+
     it 'checks the return type of a method defined by the primalizer' do
       my_serializer = Class.new(Single) do
         attributes(foo: string)

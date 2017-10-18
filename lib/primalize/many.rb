@@ -35,6 +35,25 @@ module Primalize
       end
     end
 
+    def self.optional serializer_class
+      Class.new(Optional) do
+        define_method :initialize do |object|
+          return if object.nil?
+
+          @object = object
+          @serializer = serializer_class.new(object)
+        end
+      end
+    end
+
+    class Optional
+      def call
+        return nil if @object.nil?
+
+        @serializer.call
+      end
+    end
+
     class Enumerable
       def initialize enumerable
         validate! enumerable
@@ -69,7 +88,14 @@ module Primalize
     end
 
     def validate_attributes! attributes
-      unless self.class.attributes.each_key.all? { |key| attributes[key] }
+      attr_map = self.class.attributes
+      all_required_attributes_provided = attr_map
+        .each_key
+        .all? do |key|
+          attributes[key] || (attr_map[key].superclass == Optional)
+        end
+
+      unless all_required_attributes_provided
         non_nil_keys = attributes
           .select { |_attr, value| value }
           .map { |attr, _value| attr }

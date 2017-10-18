@@ -87,6 +87,16 @@ module Primalize
         .to raise_error ArgumentError, /missing.*user/
     end
 
+    it 'does not raise an error if an argument is nil but optional' do
+      user_serializer_class = self.user_serializer_class
+      serializer_class = Class.new(Many) do
+        attributes(user: optional(user_serializer_class))
+        self
+      end
+
+      expect(serializer_class.new(user: nil).call).to eq(user: nil)
+    end
+
     it 'raises an error if an enumerable argument is not an enumerable' do
       expect {
         serializer_class.new(
