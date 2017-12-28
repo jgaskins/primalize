@@ -176,12 +176,19 @@ module Primalize
               allowed_values.first
             end
           },
+          order: primalize(order_serializer_class) { |order|
+            order || default_order
+          },
           value: number { |value| value.to_i },
           loosely_defined: any(string, integer) { |lol| lol.to_s },
           created_at: timestamp { |created_at|
             Time.parse(created_at)
           },
         )
+
+        def self.default_order
+          OpenStruct.new(price_cents: 100_00, payment_method: 'cash')
+        end
       end
 
       created_at = Time.new(2017, 9, 16, 12, 57, 0, '-04:00')
@@ -197,6 +204,7 @@ module Primalize
         value: nil,
         loosely_defined: nil,
         created_at: created_at.iso8601,
+        order: nil,
       )
 
       expect(my_serializer.new(object).call).to eq(
@@ -210,6 +218,10 @@ module Primalize
         },
         rating: 5.0,
         address: 'omg',
+        order: {
+          price_cents: 100_00,
+          payment_method: 'cash',
+        },
         state: 1,
         value: 0,
         loosely_defined: '',

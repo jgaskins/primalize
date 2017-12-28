@@ -292,10 +292,10 @@ module Primalize
 
       def initialize primalizer, &coercion
         @primalizer = primalizer
-        @coercion = coercion || proc do |obj|
+        @coercion = proc do |obj|
           # FIXME: this is dumb
           begin
-            primalizer.new(obj).call
+            primalizer.new((coercion || DEFAULT_COERCION).call(obj)).call
           rescue ArgumentError => e
             raise TypeError.new(e)
           end
