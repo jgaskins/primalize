@@ -11,7 +11,11 @@ module Primalize
     class << self
 
       def attributes attrs={}
-        @attributes ||= {}
+          @attributes ||= if self.equal? Primalize::Single
+                            {}
+                          else
+                            superclass.attributes.dup
+                          end
 
         add_attributes attrs
 

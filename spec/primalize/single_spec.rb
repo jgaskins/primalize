@@ -2,34 +2,34 @@ require 'primalize/single'
 require 'time'
 
 module Primalize
+  order_serializer_class = Class.new(Primalize::Single) do
+    attributes(
+      price_cents: integer,
+      payment_method: string,
+    )
+  end
+
+  serializer_class = Class.new(Primalize::Single) do
+    attributes(
+      id: integer,
+      name: string,
+      nicknames: array(string),
+      active: boolean,
+      options: object(
+        color: string,
+        count: integer,
+      ),
+      rating: float,
+      address: optional(string),
+      state: enum(1, 2, 3, 4),
+      order: primalize(order_serializer_class),
+      value: number,
+      loosely_defined: any(string, integer),
+      created_at: timestamp,
+    )
+  end
+
   RSpec.describe Single do
-    order_serializer_class = Class.new(Single) do
-      attributes(
-        price_cents: integer,
-        payment_method: string,
-      )
-    end
-
-    serializer_class = Class.new(Single) do
-      attributes(
-        id: integer,
-        name: string,
-        nicknames: array(string),
-        active: boolean,
-        options: object(
-          color: string,
-          count: integer,
-        ),
-        rating: float,
-        address: optional(string),
-        state: enum(1, 2, 3, 4),
-        order: primalize(order_serializer_class),
-        value: number,
-        loosely_defined: any(string, integer),
-        created_at: timestamp,
-      )
-    end
-
     let(:default_attrs) do
       {
         id: 123,
@@ -215,6 +215,22 @@ module Primalize
         loosely_defined: '',
         created_at: created_at,
       )
+    end
+
+    it 'allows adding attributes in a subclass' do
+      derived_serializer_class = Class.new(serializer_class) do
+        attributes(
+          metadata: object,
+        )
+      end
+      object = double(default_attrs.merge(
+        metadata: { foo: 'bar' },
+      ))
+
+      expect(derived_serializer_class.new(object).call).to match(a_hash_including(
+        name: object.name,
+        metadata: { foo: 'bar' },
+      ))
     end
 
     describe 'pretty inspect' do
