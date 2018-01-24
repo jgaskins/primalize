@@ -266,8 +266,6 @@ module Primalize
     end
 
     class Object
-      include Type
-
       def initialize types, &coercion
         @types = types
         @coercion = coercion
@@ -278,6 +276,26 @@ module Primalize
 
         @types.all? do |attr, type|
           type === value[attr]
+        end
+      end
+
+      def coerce hash
+        if @coercion
+          return @coercion.call(hash)
+        end
+
+        if hash.respond_to? :map
+          hash.each_with_object({}) do |(key, value), h|
+            _, type = @types.find { |_, type| type === value }
+
+            h[key] = if type.respond_to? :coerce
+                       type.coerce(value)
+                     else
+                       value
+                     end
+          end
+        else
+          hash
         end
       end
 
@@ -347,8 +365,6 @@ module Primalize
     end
 
     class Any
-      include Type
-
       def initialize types, &coercion
         @types = types
         @coercion = coercion
@@ -356,6 +372,19 @@ module Primalize
 
       def === value
         @types.empty? || @types.any? { |type| type === value }
+      end
+
+      def coerce value
+        if @coercion
+          return @coercion.call(value)
+        end
+
+        type = @types.find { |type| type === value }
+        if type.respond_to? :coerce
+          type.coerce(value)
+        else
+          value
+        end
       end
 
       def inspect

@@ -314,6 +314,31 @@ module Primalize
         .to eq({ stuff: [{ id: 'lol' }] }.to_json)
     end
 
+    it 'allows separate coercions in nested calls' do
+      foo_serializer = Class.new(Single) do
+        attributes(
+          array: array(string(&:upcase)),
+          any: any(string(&:upcase)),
+          hash: object(key: string(&:upcase)),
+          enum: enum('LOL') { |value| value.upcase },
+        )
+      end
+
+      foo = double('Foo',
+                   array: ['lol'],
+                   any: 'lol',
+                   hash: { key: 'lol' },
+                   enum: 'lol',
+                  )
+
+      expect(foo_serializer.new(foo).to_json).to eq({
+        array: ['LOL'],
+        any: 'LOL',
+        hash: { key: 'LOL' },
+        enum: 'LOL',
+      }.to_json)
+    end
+
     describe 'conversion' do
       let(:obj) { double(hello: 'world') }
       let(:my_serializer) do
