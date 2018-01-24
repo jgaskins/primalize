@@ -102,6 +102,15 @@ module Primalize
       end
     end
 
+    it 'uses the return value of the handler as the attribute value' do
+      my_serializer = Class.new(Single) do
+        self.type_mismatch_handler = proc { 'stuff' }
+        attributes(foo: string)
+      end
+
+      expect(my_serializer.new(double(foo: nil)).call).to eq(foo: 'stuff')
+    end
+
     it 'raises an error if it receives nil' do
       expect { serializer_class.new(nil).call }
         .to raise_error ArgumentError

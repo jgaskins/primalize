@@ -110,11 +110,16 @@ module Primalize
       self.class.attributes.each_with_object({}) do |(attr, type), hash|
         value = public_send(attr)
 
-        if type === value
-          hash[attr] = value
-        else
-          self.class.type_mismatch_handler.call self.class, attr, type, value
-        end
+        hash[attr] = if type === value
+                       value
+                     else
+                       self.class.type_mismatch_handler.call(
+                         self.class,
+                         attr,
+                         type,
+                         value,
+                       )
+                     end
       end
     end
 
