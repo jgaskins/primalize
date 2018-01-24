@@ -303,6 +303,17 @@ module Primalize
       end
     end
 
+    it 'allows nesting primals under other calls' do
+      foo_serializer = Class.new(Single) { attributes(id: string) }
+      bar_serializer = Class.new(Single) { attributes(stuff: array(primalize(foo_serializer))) }
+
+      foo = double('Foo', id: 'lol')
+      bar = double('Bar', stuff: [foo])
+
+      expect(bar_serializer.new(bar).to_json)
+        .to eq({ stuff: [{ id: 'lol' }] }.to_json)
+    end
+
     describe 'conversion' do
       let(:obj) { double(hello: 'world') }
       let(:my_serializer) do

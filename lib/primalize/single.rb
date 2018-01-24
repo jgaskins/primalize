@@ -208,8 +208,6 @@ module Primalize
     end
 
     class Array
-      include Type
-
       def initialize types, &coercion
         @types = types
         @coercion = coercion
@@ -219,6 +217,25 @@ module Primalize
         return false unless ::Array === value
         value.all? do |item|
           @types.any? { |type| type === item }
+        end
+      end
+
+      def coerce array
+        if @coercion
+          return @coercion.call(array)
+        end
+
+        if array.respond_to? :map
+          array.map do |item|
+            type = @types.find { |type| type === item }
+            if type.respond_to? :coerce
+              type.coerce(item)
+            else
+              item
+            end
+          end
+        else
+          array
         end
       end
 
@@ -295,7 +312,8 @@ module Primalize
         @coercion = proc do |obj|
           # FIXME: this is dumb
           begin
-            primalizer.new((coercion || DEFAULT_COERCION).call(obj)).call
+            coerced = (coercion || DEFAULT_COERCION).call(obj)
+            primalizer.new(coerced).call
           rescue ArgumentError => e
             raise TypeError.new(e)
           end
