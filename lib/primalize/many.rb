@@ -1,3 +1,5 @@
+require 'json'
+
 module Primalize
   class Many
     def self.attributes attrs={}

@@ -1,3 +1,5 @@
+require 'json'
+
 require 'primalize/many'
 require 'primalize/single'
 
