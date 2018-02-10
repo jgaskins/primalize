@@ -9,13 +9,16 @@ module Primalize
     end
 
     class << self
+      def attributes **attrs
+        _attributes attrs
+      end
 
-      def attributes attrs={}
-          @attributes ||= if self.equal? Primalize::Single
-                            {}
-                          else
-                            superclass.attributes.dup
-                          end
+      def _attributes **attrs
+        @attributes ||= if self.equal? Primalize::Single
+                          {}
+                        else
+                          superclass._attributes.dup
+                        end
 
         add_attributes attrs
 
@@ -107,7 +110,7 @@ module Primalize
     end
 
     def call
-      self.class.attributes.each_with_object({}) do |(attr, type), hash|
+      self.class._attributes.each_with_object({}) do |(attr, type), hash|
         value = public_send(attr)
 
         hash[attr] = if type === value
@@ -130,7 +133,7 @@ module Primalize
     end
 
     def csv_headers
-      self.class.attributes.keys.map(&:to_s)
+      self.class._attributes.keys.map(&:to_s)
     end
 
     def to_csv
