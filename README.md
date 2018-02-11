@@ -1,5 +1,7 @@
 # Primalize
 
+[![Join the chat at https://gitter.im/jgaskins/primalize](https://badges.gitter.im/jgaskins/primalize.svg)](https://gitter.im/jgaskins/primalize?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Primalize lets you de-evolve your objects into primitive values for serialization. The primary use case is to serialize them into JSON, but once it's in its primitive state, it can be converted into other formats such as XML or CSV.
 
 Primalizers support type checking by letting you specify the types of the resulting properties:
