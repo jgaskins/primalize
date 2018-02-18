@@ -85,6 +85,10 @@ module Primalize
         Primalizer.new(primalizer, &coerce)
       end
 
+      def validate type, &validation
+        Validation.new(type, validation)
+      end
+
       def type_mismatch_handler= handler
         @type_mismatch_handler = handler
       end
@@ -398,6 +402,29 @@ module Primalize
       def inspect
         params = "(#{@types.map(&:inspect).join(', ')})"
         "any#{@types.empty? ? nil : params}"
+      end
+    end
+
+    class Validation
+      def initialize type, validation
+        @type = type
+        @validation = validation
+      end
+
+      def coerce value
+        if @type.respond_to? :coerce
+          @type.coerce value
+        else
+          value
+        end
+      end
+
+      def === value
+        @type === value && @validation.(coerce(value))
+      end
+
+      def inspect
+        "validate(#{@type.inspect})"
       end
     end
   end
