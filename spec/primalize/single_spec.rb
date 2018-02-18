@@ -368,5 +368,18 @@ module Primalize
         CSV
       end
     end
+
+    it 'validates attributes' do
+      my_serializer = Class.new(Single) do
+        attributes(
+          number: validate(integer(&:to_i)) { |value| value.between? 0, 10 },
+        )
+      end
+
+      expect(my_serializer.new(double(number: 10)).call).to eq(number: 10)
+      expect(my_serializer.new(double(number: nil)).call).to eq(number: 0)
+      expect(my_serializer.new(double(number: '0')).call).to eq(number: 0)
+      expect { my_serializer.new(double(number: 12)).call }.to raise_error TypeError
+    end
   end
 end
