@@ -81,6 +81,10 @@ module Primalize
         Any.new(types, &coerce)
       end
 
+      def match matcher, &coercion
+        Match.new(matcher, &coercion)
+      end
+
       def primalize primalizer, &coerce
         Primalizer.new(primalizer, &coerce)
       end
@@ -292,9 +296,9 @@ module Primalize
           return @coercion.call(hash)
         end
 
-        if hash.respond_to? :map
+        if hash.respond_to? :each_with_object
           hash.each_with_object({}) do |(key, value), h|
-            _, type = @types.find { |_, type| type === value }
+            type = @types[key]
 
             h[key] = if type.respond_to? :coerce
                        type.coerce(value)
@@ -398,6 +402,23 @@ module Primalize
       def inspect
         params = "(#{@types.map(&:inspect).join(', ')})"
         "any#{@types.empty? ? nil : params}"
+      end
+    end
+
+    class Match
+      include Single::Type
+
+      def initialize matcher, &coercion
+        @matcher = matcher
+        @coercion = coercion
+      end
+
+      def === value
+        @matcher === value
+      end
+
+      def inspect
+        "match(#{@matcher.inspect})"
       end
     end
   end
