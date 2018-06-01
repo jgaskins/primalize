@@ -81,6 +81,10 @@ module Primalize
         Any.new(types, &coerce)
       end
 
+      def all *types, &coerce
+        All.new(types, &coerce)
+      end
+
       def match matcher, &coercion
         Match.new(matcher, &coercion)
       end
@@ -402,6 +406,23 @@ module Primalize
       def inspect
         params = "(#{@types.map(&:inspect).join(', ')})"
         "any#{@types.empty? ? nil : params}"
+      end
+    end
+
+    class All
+      include Type
+
+      def initialize types, &coercion
+        @types = types
+        @coercion = coercion
+      end
+
+      def === value
+        @types.all? { |type| type === value }
+      end
+
+      def inspect
+        "all(#{@types.map(&:inspect).join(', ')})"
       end
     end
 

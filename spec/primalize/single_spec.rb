@@ -238,6 +238,36 @@ module Primalize
       )
     end
 
+    describe 'requiring multiple matches' do
+      all_serializer_class = Class.new(Single) do
+        attributes(
+          id: all(
+            string,
+            proc { |value| (10..16).cover? value.length },
+            match(/\Ahello/),
+          ),
+        )
+      end
+
+      it 'allows for requiring multiple matches' do
+        valid = double(id: 'hello-world')
+        expect(all_serializer_class.new(valid).call).to eq(id: 'hello-world')
+      end
+
+      [
+        123,   # not a string
+        'hello', # too short
+        'hello-0123456789123456', # too long,
+        'foo-hello-world', # doesn't match /\Ahello/
+      ].each do |invalid_id|
+        it "is invalid with an id #{invalid_id}" do
+          model = double(id: invalid_id)
+          expect { all_serializer_class.new(model).call }
+            .to raise_error(TypeError)
+        end
+      end
+    end
+
     it 'allows adding attributes in a subclass' do
       derived_serializer_class = Class.new(serializer_class) do
         attributes(
