@@ -427,7 +427,7 @@ module Primalize
     end
 
     class Match
-      include Single::Type
+      include Type
 
       def initialize matcher, &coercion
         @matcher = matcher
