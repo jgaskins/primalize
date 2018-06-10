@@ -108,6 +108,24 @@ module Primalize
       }.to raise_error ArgumentError, /must receive an Enumerable object/
     end
 
+    it 'allows inheritance of superclass attributes' do
+      # The serializer just returns the object it receives
+      model_serializer = Struct.new(:call)
+
+      parent_response = Class.new(Many) do
+        attributes(foo: model_serializer)
+      end
+
+      child_response = Class.new(parent_response) do
+        attributes(bar: model_serializer)
+      end
+
+      expect(child_response.new(foo: 1, bar: 2).call).to eq(
+        foo: 1,
+        bar: 2,
+      )
+    end
+
     describe 'conversion' do
       let(:serializer) { serializer_class.new(user: user, tweets: tweets) }
 

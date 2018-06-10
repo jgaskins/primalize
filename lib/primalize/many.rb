@@ -21,6 +21,11 @@ module Primalize
       @attributes.merge! attrs
     end
 
+    # Pass on our attributes to child classes
+    def self.inherited klass
+      klass.attributes attributes
+    end
+
     def self.enumerable serializer_class
       Class.new(Enumerable) do
         define_method :call do
