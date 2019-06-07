@@ -136,8 +136,8 @@ module Primalize
 
     # CONVERSION
 
-    def to_json
-      call.to_json
+    def to_json(options=nil)
+      call.to_json(options)
     end
 
     def csv_headers
