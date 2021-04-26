@@ -10,7 +10,7 @@ module Primalize
 
     class << self
       def attributes **attrs
-        _attributes attrs
+        _attributes **attrs
       end
 
       def _attributes **attrs
