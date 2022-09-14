@@ -378,6 +378,24 @@ module Primalize
       def inspect
         "optional(#{@types.map(&:inspect).join(', ')})"
       end
+
+      def coerce value
+        if value.nil?
+          super
+        else
+          type = @types.find { |type| type === value }
+
+          if type.respond_to? :coerce
+            if @coercion
+              @coercion.call(value)
+            else
+              type.coerce(value)
+            end
+          else
+            value
+          end
+        end
+      end
     end
 
     class Any

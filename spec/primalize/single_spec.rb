@@ -342,7 +342,7 @@ module Primalize
       end
     end
 
-    it 'allows nesting primals under other calls' do
+    it 'allows nesting primals under array calls' do
       foo_serializer = Class.new(Single) { attributes(id: string) }
       bar_serializer = Class.new(Single) { attributes(stuff: array(primalize(foo_serializer))) }
 
@@ -351,6 +351,24 @@ module Primalize
 
       expect(bar_serializer.new(bar).to_json)
         .to eq({ stuff: [{ id: 'lol' }] }.to_json)
+    end
+
+    it 'allows nesting primals in optional' do
+      foo_serializer = Class.new(Single) { attributes(id: string) }
+      bar_serializer = Class.new(Single) { attributes(stuff: optional(primalize(foo_serializer))) }
+
+      foo = double('Foo', id: 'lol')
+      bar_sans_foo = double('Bar', stuff: nil)
+      bar_with_foo = double('Bar', stuff: foo)
+
+      expect(bar_serializer.new(bar_sans_foo).to_json)
+        .to eq({ stuff: nil }.to_json)
+
+      # This fails with the following:
+      # expected: "{\"stuff\":{\"id\":\"lol\"}}"
+      #      got: "{\"stuff\":\"#[Double \\\"Foo\\\"]\"}"
+      expect(bar_serializer.new(bar_with_foo).to_json)
+        .to eq({ stuff: { id: 'lol' } }.to_json)
     end
 
     it 'allows separate coercions in nested calls' do
