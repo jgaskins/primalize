@@ -150,12 +150,18 @@ By default, subclasses of `Primalize::Single` will raise an `ArgumentError` if t
 
 ```ruby
 Primalize::Single.type_mismatch_handler = proc do |primalizer, attr, type, value|
-  msg = "Type mismatch: #{primalizer.name}##{attr} is expected to be #{type.inspect}, but is a #{value.inspect}\n"
+  msg = "Type mismatch: #{primalizer.name}##{attr} is expected to be #{type.inspect}, but is #{value.inspect}\n"
   msg << caller.grep(Regexp.new(Rails.root)).join("\n") # Include application stack trace
 
   Slack.notify '#bugs', msg
+
+  nil # Don't emit any value for an incorrect attribute
 end
 ```
+
+Note that this example returns `nil` when there is a type mismatch after reporting the bug. The return value of the block becomes the value serialized into your payload, so you can allow the incorrect value to pass through, clear it, or anything else that makes sense for your use case.
+
+Also note that `type_mismatch_handler` is set on `Primalize::Single` here. You can also set it for individual classes and it will be inherited by all subclasses. For example, if you have different use cases for serialization within the same application, such as API responses sent over HTTP and events passed through a message broker, you can perform different type-mismatch handling for each.
 
 ## Development
 
